@@ -26,7 +26,10 @@ class testApp : public ofxiPhoneApp{
 	void videoLoop();
 	void soplando();
 	void alejandose();
+	void LimpiaTexturaVideo();
+	void LimpiaTexturaLoopVideo();
 	
+	unsigned char 	* colorPixels;
 	void drawHighlightString(string text, int x, int y, ofColor background, ofColor foreground);
 
 	ofiPhoneVideoPlayer video,videoSopla,videoLejos;
