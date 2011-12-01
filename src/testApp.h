@@ -20,6 +20,13 @@ class testApp : public ofxiPhoneApp{
 		void touchUp(ofTouchEventArgs &touch);
 		void touchDoubleTap(ofTouchEventArgs &touch);
 		void touchCancelled(ofTouchEventArgs &touch);
+	
+	void controlaEstado(ofxOscMessage m);
+	void cambiaEstado(string _nuevoEstado);
+	void videoLoop();
+	void soplando();
+	void alejandose();
+	
 	void drawHighlightString(string text, int x, int y, ofColor background, ofColor foreground);
 
 	ofiPhoneVideoPlayer video,videoSopla,videoLejos;
