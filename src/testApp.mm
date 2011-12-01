@@ -26,6 +26,15 @@ void testApp::setup(){
 	textura.allocate(1024,576,GL_RGB);
 	
 	estado = "loop";
+	
+	colorPixels = new unsigned char [1024*576*3];
+	for (int i = 0; i < 1024; i++){
+		for (int j = 0; j < 576; j++){
+			colorPixels[(j*1024+i)*3 + 0] = 255;	// r
+			colorPixels[(j*1024+i)*3 + 1] = 255;	// g
+			colorPixels[(j*1024+i)*3 + 2] = 255; // b
+		}
+	}
 }
 
 //--------------------------------------------------------------
@@ -70,10 +79,13 @@ void testApp::cambiaEstado(string _nuevoEstado){
 		/// pa facer stop
 		if(estado=="loop"){
 			video.stop();
+			//LimpiaTexturaLoopVideo();
 		}else if(estado=="sopla"){
 			videoSopla.stop();
+			LimpiaTexturaVideo();
 		}else if(estado=="lejos"){
 			videoLejos.stop();
+			LimpiaTexturaVideo();
 		}
 		//// pa facer play //////////////////////////////
 		if(_nuevoEstado=="loop"){
@@ -88,7 +100,12 @@ void testApp::cambiaEstado(string _nuevoEstado){
 		estado = _nuevoEstado; ///vas a cambiar el estado
 	}
 }
-
+void testApp::LimpiaTexturaVideo(){
+	textura.loadData(colorPixels,1024,576,GL_RGB);
+}
+void testApp::LimpiaTexturaLoopVideo(){
+	texturaLoop.loadData(colorPixels,1024,576,GL_RGB);
+}
 
 void testApp::videoLoop(){
 	/// video base que se ejecuta cuando el estado es looop
@@ -108,6 +125,7 @@ void testApp::soplando(){
 	if(videoSopla.getIsMovieDone()){
 		cambiaEstado("loop");
 	}
+	cout << videoSopla.getPosition() << endl;
 	if(videoSopla.isFrameNew()){
 		textura.loadData(videoSopla.getPixels(),1024,576,GL_RGB);
 	}
