@@ -40,24 +40,12 @@ void testApp::update(){
 		ofxOscMessage m;
 		mensaje = true;
 		receiver.getNextMessage(&m);
-		
 		if( m.getAddress() == "/video" ){
 			string dices = m.getArgAsString(0);
-			
-			if(dices == "sopla")
-			{
-				dices = "sopla";
-			}else if(dices == "loop"){
-				dices = "loop";
-			}else if(dices == "lejos"){
-				dices = "lejos";
-			}
 			if(dices != estado){
 				estado = dices;
 				cout << estado << endl;
 			}
-			
-			
 		}
 	}
 	
