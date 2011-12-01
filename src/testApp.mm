@@ -5,12 +5,8 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
-	//ofSetOrientation(OF_ORIENTATION_90_LEFT);
-	/////ofSetDataPathRoot("data");
-	
-	ofSetFrameRate(30);
+	ofSetOrientation(OF_ORIENTATION_90_LEFT);
 	ofBackground(225, 225, 225);
-	// register touch events
 	ofRegisterTouchEvents(this);
 	ofBackground(255,255,255);
 	receiver.setup(PORT);
@@ -34,86 +30,101 @@ void testApp::setup(){
 
 //--------------------------------------------------------------
 void testApp::update(){
-	
     while( receiver.hasWaitingMessages() ){
-		// get the next message
 		ofxOscMessage m;
-		mensaje = true;
-		receiver.getNextMessage(&m);
-		if( m.getAddress() == "/video" ){
-			string dices = m.getArgAsString(0);
-			if(dices != estado){
-				estado = dices;
-				cout << estado << endl;
-			}
-		}
+		controlaEstado(m);
 	}
-	
-	if(video.isLoaded()){
-		if(video.isPaused() && estado=="loop"){
-			video.setPaused(false);
-		}else if(!video.isPaused() && estado =="loop"){
-			if(!video.isPlaying()){video.play();}
-			if(video.getIsMovieDone()){video.stop();video.play();}
-			video.update();
-			if(video.isFrameNew()){
-				texturaLoop.loadData(video.getPixels(),1024,576,GL_RGB);
-			}
-		}
+	if(estado == "loop"){
+		videoLoop();
+	}else if(estado == "sopla"){
+		soplando();
+	}else if(estado == "lejos"){
+		alejandose();
 	}
-	if(estado =="sopla"){
-		if(videoSopla.isLoaded()){
-			if(videoSopla.getIsMovieDone()){
-				estado = "loop";
-				if(video.isPaused()){video.setPaused(false);}
-				videoSopla.stop();
-				videoSopla.loadMovie("sopla.mp4");
-				return;
-			}else{
-				if(!videoSopla.isPlaying()){videoSopla.play();}
-				videoSopla.update();
-				if(!video.isPaused()){video.setPaused(true);}
-				if(videoSopla.isFrameNew()){
-					textura.loadData(videoSopla.getPixels(),1024,576,GL_RGB);
-				}
-			}
-		}
-	}
-	
-	if(estado =="lejos"){
-		if(videoLejos.isLoaded()){
-			if(videoLejos.getIsMovieDone()){
-				estado = "loop";
-				if(video.isPaused()){video.setPaused(false);}
-				videoLejos.stop();
-				videoLejos.loadMovie("lejos.mp4");
-				return;
-			}else{
-				if(!videoLejos.isPlaying()){videoLejos.play();}
-				videoLejos.update();
-				if(!video.isPaused()){video.setPaused(true);}
-				if(videoLejos.isFrameNew()){
-					textura.loadData(videoLejos.getPixels(),1024,576,GL_RGB);
-				}
-			}
-		}
-	}
-	
-	
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
 	ofSetColor(255);
 	
-	//foto.draw(0, 0);
 	if(estado == "loop"){
-		texturaLoop.draw(-100,1080-576,0);
+		texturaLoop.draw(0,0,0);
 	}else{
-		textura.draw(-100,1080-576,0);
+		textura.draw(0,0,0);
 	}
 	drawHighlightString(ofToString(estado),10,10,ofColor(255,0,0),ofColor(255,255,255));
 }
+
+
+void testApp::controlaEstado(ofxOscMessage m){
+	receiver.getNextMessage(&m);
+	string dices = m.getArgAsString(0);
+	if(dices != estado){
+		//cout << "hemos cambiado de estado, en anterior era::" << estado << " y el nuevo es::" << dices << endl;
+		cambiaEstado(dices);
+		//estado = dices; ///vas a cambiar el estado
+	}
+}
+void testApp::cambiaEstado(string _nuevoEstado){
+	if(_nuevoEstado != estado){
+		/// pa facer stop
+		if(estado=="loop"){
+			video.stop();
+		}else if(estado=="sopla"){
+			videoSopla.stop();
+		}else if(estado=="lejos"){
+			videoLejos.stop();
+		}
+		//// pa facer play //////////////////////////////
+		if(_nuevoEstado=="loop"){
+			video.play();
+		}else if(_nuevoEstado=="sopla"){
+			videoSopla.play();
+		}else if(_nuevoEstado=="lejos"){
+			videoLejos.play();
+		}
+		
+		//cout << "hemos cambiado de estado, A MANO en anterior era::" << estado << " y el nuevo es::" << _nuevoEstado << endl;
+		estado = _nuevoEstado; ///vas a cambiar el estado
+	}
+}
+
+
+void testApp::videoLoop(){
+	/// video base que se ejecuta cuando el estado es looop
+	video.update();
+	if(video.getIsMovieDone()){
+		//// loop
+		video.stop();
+		video.play();
+	}
+	if(video.isFrameNew()){
+		texturaLoop.loadData(video.getPixels(),1024,576,GL_RGB);
+	}
+}
+
+void testApp::soplando(){
+	videoSopla.update();
+	if(videoSopla.getIsMovieDone()){
+		cambiaEstado("loop");
+	}
+	if(videoSopla.isFrameNew()){
+		textura.loadData(videoSopla.getPixels(),1024,576,GL_RGB);
+	}
+}
+
+void testApp::alejandose(){
+	videoLejos.update();
+	if(videoLejos.getIsMovieDone()){
+		cambiaEstado("loop");
+	}
+	if(videoLejos.isFrameNew()){
+		textura.loadData(videoLejos.getPixels(),1024,576,GL_RGB);
+	}
+}
+
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 
 //--------------------------------------------------------------
 void testApp::touchDown(ofTouchEventArgs &touch){
@@ -130,6 +141,7 @@ void testApp::touchUp(ofTouchEventArgs &touch){
 
 //--------------------------------------------------------------
 void testApp::touchDoubleTap(ofTouchEventArgs &touch){
+	cambiaEstado("lejos");
 }
 
 //--------------------------------------------------------------
